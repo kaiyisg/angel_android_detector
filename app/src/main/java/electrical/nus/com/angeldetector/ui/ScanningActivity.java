@@ -28,7 +28,7 @@ public class ScanningActivity extends AppCompatActivity {
 
         bluetoothDeviceListView = (ListView)findViewById(R.id.listView);
         if(this.mLeDeviceListAdapter==null){
-            mLeDeviceListAdapter = new BluetoothDeviceAdapter(this,0);
+            mLeDeviceListAdapter = new BluetoothDeviceAdapter(this,android.R.id.text1);
         }
 
         //initializing bluetooth manager
