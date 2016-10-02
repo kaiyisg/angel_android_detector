@@ -8,9 +8,13 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +36,7 @@ import electrical.nus.com.angeldetector.adapter.GattCharacteristicsAdapter;
 import electrical.nus.com.angeldetector.adapter.GattCharacteristicsItem;
 import electrical.nus.com.angeldetector.adapter.GattServiceAdapter;
 import electrical.nus.com.angeldetector.adapter.GattServiceItem;
+import electrical.nus.com.angeldetector.services.BluetoothLeService;
 import electrical.nus.com.angeldetector.services.SrvDictionary;
 
 public class MainActivity extends AppCompatActivity {
@@ -53,109 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int GATT_STATE_CONNECTED = 1;
     private static final int GATT_STATE_DISCOVERED_SERVICES = 2;
     private static final int GATT_STATE_NO_DISCOVERED_SERVICES = 3;
+    public static final int GATT_STATE_DATA_AVAILABLE = 4;
     private int gattState = GATT_STATE_DISCONNECTED;
 
-    public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
-
     private final static String TAG = MainActivity.class.getSimpleName();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        this.context = this;
-        setContentView(R.layout.activity_main);
-        bleaddressTextView = (TextView)findViewById(R.id.bleaddressTextView);
-        gattStatusTextview = (TextView)findViewById(R.id.gattStatusTextview);
-        gattServicesListView = (ListView)findViewById(R.id.gattServicesListView);
-        gattServicesView = (LinearLayout)findViewById(R.id.gattServicesView);
-        gattCharacteristicsView = (LinearLayout)findViewById(R.id.gattCharacteristicsView);
-        gattCharacteristicsListView = (ListView)findViewById(R.id.gattCharacteristicsListView);
-
-        mGattServiceAdapter = new GattServiceAdapter(this,R.layout.list_item);
-        gattServicesListView.setAdapter(mGattServiceAdapter);
-        srvDictionary = new SrvDictionary();
-        gattServicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View item, int position, long id) {
-                GattServiceItem serviceItem = mGattServiceAdapter.getItem(position);
-                BluetoothGattService gattService= serviceItem.getmBluetoothGattService();
-                gattCharacteristicsView.setVisibility(View.VISIBLE);
-                Assert.assertTrue(gattService != null);
-
-                mGattCharacteristicsAdapter.clear();
-                mGattCharacteristicsAdapter.clearAdapter();
-                mGattCharacteristicsAdapter.notifyDataSetChanged();
-                //gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
-                for(BluetoothGattCharacteristic charac:gattService.getCharacteristics()){
-                    GattCharacteristicsItem btchar = new GattCharacteristicsItem(
-                            serviceItem.getItemName(),
-                            charac.getUuid().toString(),
-                            charac);
-                    mGattCharacteristicsAdapter.add(btchar);
-                    mGattCharacteristicsAdapter.addItem(btchar);
-                }
-                mGattCharacteristicsAdapter.notifyDataSetChanged();
-            }
-        });
-
-        mGattCharacteristicsAdapter = new GattCharacteristicsAdapter(this, R.layout.list_item);
-        gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
-        gattCharacteristicsView.setVisibility(View.GONE);
-        gattCharacteristicsListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                GattCharacteristicsItem gattCharacteristicsItem = mGattCharacteristicsAdapter.getItem(position);
-                BluetoothGattCharacteristic characteristic = gattCharacteristicsItem.getmBluetoothGattCharacteristic();
-                int properties = characteristic.getProperties();
-
-                if(bluetoothGatt != null) {
-                    if(((properties & 16) > 0 || (properties & 32) > 0)) {
-                        if(!bluetoothGatt.setCharacteristicNotification(characteristic, true)) {
-                            throw new AssertionError("Failed setCharacteristicNotification for UUID " + characteristic.getUuid());
-                        } else {
-                            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-                            //byte[] NOTIFY_AND_INDICATE = new byte[]{(byte)3, (byte)0};
-                            //descriptor.setValue(enabled?NOTIFY_AND_INDICATE:BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-                            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                            //this.mWaitingForConfirmation = true;
-                            if(!bluetoothGatt.writeDescriptor(descriptor)) {
-                                throw new AssertionError("Failed to write BLE descriptor " + descriptor.getUuid() + " for UUID " + characteristic.getUuid());
-                            } /*else {
-                                try {
-                                    synchronized(this) {
-                                        this.wait(5000L);
-                                        *//*if(this.mWaitingForConfirmation) {
-                                            throw new AssertionError("Did not receive confirmation for mBluetoothGatt.writeDescriptor(" + characteristic.getUuid() + ")");
-                                        }*//*
-                                    }
-                                } catch (InterruptedException var8) {
-                                    throw new AssertionError("Interrupted while waiting for response to mBluetoothGatt.writeDescriptor");
-                                }
-                            }*/
-                        }
-                    }else{
-                        UserInteraction.showAlert("Non-readable Bluetooth Property", String.valueOf(properties),context);
-                    }
-
-                }
-
-
-                //https://developer.android.com/reference/android/bluetooth/BluetoothGatt.html#setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean)
-                /*boolean enabled = bluetoothGatt.setCharacteristicNotification(
-                        characteristic,
-                        true);
-
-                //find descriptor UUID that matches Client Characteristic Configuration (0x2902)
-                // and then call setValue on that descriptor
-                BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                        UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                bluetoothGatt.writeDescriptor(descriptor);*/
-            }
-        });
-    }
 
     private void setViewState(int state){
         if(state==GATT_STATE_DISCONNECTED){
@@ -199,6 +105,142 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+        else if(state==GATT_STATE_DATA_AVAILABLE){
+            gattState=GATT_STATE_DATA_AVAILABLE;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                }
+            });
+        }
+    }
+
+    private BluetoothLeService mBluetoothLeService;
+    private boolean mConnected = false;
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(bluetoothDevice.getAddress());
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+    //                        or notification operations.
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                mConnected = true;
+                setViewState(GATT_STATE_CONNECTED);
+                //invalidateOptionsMenu();
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                mConnected = false;
+                setViewState(GATT_STATE_DISCONNECTED);
+                //invalidateOptionsMenu();
+                //clearUI();
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                setViewState(GATT_STATE_DISCOVERED_SERVICES);
+                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                setViewState(GATT_STATE_DATA_AVAILABLE);
+                UserInteraction.showAlert("new data available", "data avail",context);
+                //displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+            }
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.context = this;
+        setContentView(R.layout.activity_main);
+        bleaddressTextView = (TextView)findViewById(R.id.bleaddressTextView);
+        gattStatusTextview = (TextView)findViewById(R.id.gattStatusTextview);
+        gattServicesListView = (ListView)findViewById(R.id.gattServicesListView);
+        gattServicesView = (LinearLayout)findViewById(R.id.gattServicesView);
+        gattCharacteristicsView = (LinearLayout)findViewById(R.id.gattCharacteristicsView);
+        gattCharacteristicsListView = (ListView)findViewById(R.id.gattCharacteristicsListView);
+
+        mGattServiceAdapter = new GattServiceAdapter(this,R.layout.list_item);
+        gattServicesListView.setAdapter(mGattServiceAdapter);
+        srvDictionary = new SrvDictionary();
+        /*gattServicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View item, int position, long id) {
+                GattServiceItem serviceItem = mGattServiceAdapter.getItem(position);
+                BluetoothGattService gattService= serviceItem.getmBluetoothGattService();
+                gattCharacteristicsView.setVisibility(View.VISIBLE);
+                Assert.assertTrue(gattService != null);
+
+                mGattCharacteristicsAdapter.clear();
+                mGattCharacteristicsAdapter.clearAdapter();
+                mGattCharacteristicsAdapter.notifyDataSetChanged();
+                //gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
+                for(BluetoothGattCharacteristic charac:gattService.getCharacteristics()){
+                    GattCharacteristicsItem btchar = new GattCharacteristicsItem(
+                            serviceItem.getItemName(),
+                            charac.getUuid().toString(),
+                            charac);
+                    mGattCharacteristicsAdapter.add(btchar);
+                    mGattCharacteristicsAdapter.addItem(btchar);
+                }
+                mGattCharacteristicsAdapter.notifyDataSetChanged();
+            }
+        });
+
+        mGattCharacteristicsAdapter = new GattCharacteristicsAdapter(this, R.layout.list_item);
+        gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
+        gattCharacteristicsView.setVisibility(View.GONE);
+        gattCharacteristicsListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                GattCharacteristicsItem gattCharacteristicsItem = mGattCharacteristicsAdapter.getItem(position);
+                BluetoothGattCharacteristic characteristic = gattCharacteristicsItem.getmBluetoothGattCharacteristic();
+                int properties = characteristic.getProperties();
+
+                if(bluetoothGatt != null) {
+                    if(((properties & 16) > 0 || (properties & 32) > 0)) {
+                        if(!bluetoothGatt.setCharacteristicNotification(characteristic, true)) {
+                            throw new AssertionError("Failed setCharacteristicNotification for UUID " + characteristic.getUuid());
+                        } else {
+                            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(SrvDictionary.CLIENT_CHARACTERISTIC_CONFIG);
+                            //byte[] NOTIFY_AND_INDICATE = new byte[]{(byte)3, (byte)0};
+                            //descriptor.setValue(enabled?NOTIFY_AND_INDICATE:BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+                            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                            //this.mWaitingForConfirmation = true;
+                            if(!bluetoothGatt.writeDescriptor(descriptor)) {
+                                throw new AssertionError("Failed to write BLE descriptor " + descriptor.getUuid() + " for UUID " + characteristic.getUuid());
+                            }
+                        }
+                    }else{
+                        UserInteraction.showAlert("Non-readable Bluetooth Property", String.valueOf(properties),context);
+                    }
+                }
+            }
+        });*/
+
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
     protected void onStart() {
@@ -292,8 +334,6 @@ public class MainActivity extends AppCompatActivity {
                 if(charcteristicUuid == null) {
                     throw new AssertionError();
                 } else {
-                    //BleDevice.this.handleOnCharacteristicChanged(serviceUuid, charcteristicUuid);
-                    //characteristic.
                 }
             }
         }
