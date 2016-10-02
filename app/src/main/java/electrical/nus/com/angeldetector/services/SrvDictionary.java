@@ -10,6 +10,10 @@ public class SrvDictionary {
 
     public HashMap<UUID, String> map;
 
+    /********************************************************************
+     * AS DEFINED FOR A BLUETOOTH SERVICE
+     * ******************************************************************/
+
     //DEFINED IN BLUETOOTH PROTOCOL
     public static final UUID HEART_RATE_SERVICE_UUID = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
     public static final UUID HEALTH_THERMOMETER_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
@@ -26,6 +30,11 @@ public class SrvDictionary {
     public static final UUID HEALTH_JOURNAL_SERVICE_UUID = UUID.fromString("87ef07ff-4739-4527-b38f-b0e228de6ed3");
     public static final UUID BLOOD_OXYGEN_SERVICE_UUID = UUID.fromString("902dcf38-ccc0-4902-b22c-70cab5ee5df2");
 
+
+    /********************************************************************
+     * AS DEFINED FOR A BLUETOOTH DESCRIPTOR
+     * ******************************************************************/
+    public static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
 
     public SrvDictionary(){
