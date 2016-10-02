@@ -26,7 +26,7 @@ public class GattCharacteristicsItem implements Comparable<GattCharacteristicsIt
     }
 
 
-    public BluetoothGattCharacteristic getmBluetoothGattService() {
+    public BluetoothGattCharacteristic getmBluetoothGattCharacteristic() {
         return mBluetoothGattCharacteristic;
     }
 
