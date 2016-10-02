@@ -1,5 +1,6 @@
 package electrical.nus.com.angeldetector.ui;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,10 +26,10 @@ public class MainActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         assert(extras != null);
-        mBleDeviceAddress = extras.getString("ble_device_address");
+        mBleDeviceAddress = ((BluetoothDevice)extras.getParcelable("bluetooth_device")).getAddress();
         bleaddressTextView.setText(mBleDeviceAddress);
 
-        //connect(mBleDeviceAddress);
+        connect(mBleDeviceAddress);
     }
 
     @Override
@@ -40,4 +41,9 @@ public class MainActivity extends AppCompatActivity {
         unscheduleUpdaters();
         mBleDevice.disconnect();*/
     }
+
+    private void connect(String deviceAddress){
+
+    }
+
 }

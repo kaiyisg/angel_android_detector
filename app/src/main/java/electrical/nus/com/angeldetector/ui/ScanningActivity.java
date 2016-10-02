@@ -125,7 +125,8 @@ public class ScanningActivity extends AppCompatActivity {
                 BluetoothDevice bluetoothDevice = mLeDeviceListAdapter.getItem(position).getBluetoothDevice();
                 Assert.assertTrue(bluetoothDevice != null);
                 Intent intent = new Intent(parent.getContext(), MainActivity.class);
-                intent.putExtra("ble_device_address", bluetoothDevice.getAddress());
+                intent.putExtra("bluetooth_device", bluetoothDevice);
+                //intent.putExtra("ble_device_address", bluetoothDevice.getAddress());
                 startActivity(intent);
             }
         });
