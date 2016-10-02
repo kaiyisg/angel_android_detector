@@ -10,17 +10,23 @@ import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
 
 import electrical.nus.com.angeldetector.R;
+import electrical.nus.com.angeldetector.adapter.BluetoothDeviceItem;
+import electrical.nus.com.angeldetector.adapter.GattServiceAdapter;
+import electrical.nus.com.angeldetector.adapter.GattServiceItem;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView bleaddressTextView;
     TextView gattStatusTextview;
     BluetoothDevice bluetoothDevice;
+    ListView gattServicesListView;
+    GattServiceAdapter mGattServiceAdapter;
 
     private static final int GATT_STATE_DISCONNECTED = 0;
     private static final int GATT_STATE_CONNECTED = 1;
@@ -36,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         bleaddressTextView = (TextView)findViewById(R.id.bleaddressTextView);
         gattStatusTextview = (TextView)findViewById(R.id.gattStatusTextview);
+        gattServicesListView = (ListView)findViewById(R.id.gattServicesListView);
+        mGattServiceAdapter = new GattServiceAdapter(this,R.layout.list_item);
+        gattServicesListView.setAdapter(mGattServiceAdapter);
+
     }
 
     private void setViewState(int state){
@@ -108,10 +118,24 @@ public class MainActivity extends AppCompatActivity {
             super.onServicesDiscovered(gatt, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 setViewState(GATT_STATE_DISCOVERED_SERVICES);
-                List<BluetoothGattService> services = gatt.getServices();
-                for (BluetoothGattService service : services) {
+                final List<BluetoothGattService> services = gatt.getServices();
+                /*for (BluetoothGattService service : services) {
                     List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
-                }
+                }*/
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for(BluetoothGattService service:services){
+                            GattServiceItem newService = new GattServiceItem(
+                                    service.getClass().toString(),
+                                    service.getUuid().toString(),
+                                    service);
+                            mGattServiceAdapter.add(newService);
+                            mGattServiceAdapter.addItem(newService);
+                            mGattServiceAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
             } else {
                 setViewState(GATT_STATE_NO_DISCOVERED_SERVICES);
                 Log.w(TAG, "onServicesDiscovered received: " + status);

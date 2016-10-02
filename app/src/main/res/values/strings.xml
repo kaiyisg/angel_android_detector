@@ -16,7 +16,7 @@
     <string name="angel_sensor">AngelSensor: </string>
     <string name="angel_status">Connection status: </string>
     <string name="status_connection_not_connected">Not connected to gatt server</string>
-    <string name="status_connection_connected">Connected to gatt server!</string>
+    <string name="status_connection_connected">Connected to gatt server, discovering services...</string>
     <string name="status_discovered_gatt_services">Discovered gatt services</string>
     <string name="status_no_discovered_gatt_services">No discovered gatt services, try to restart!</string>
 </resources>
