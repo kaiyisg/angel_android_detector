@@ -68,24 +68,24 @@ public class MainActivity extends AppCompatActivity {
         gattServicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View item, int position, long id) {
-                BluetoothGattService gattService= mGattServiceAdapter.getItem(position).getmBluetoothGattService();
+                GattServiceItem serviceItem = mGattServiceAdapter.getItem(position);
+                BluetoothGattService gattService= serviceItem.getmBluetoothGattService();
                 gattCharacteristicsView.setVisibility(View.VISIBLE);
                 Assert.assertTrue(gattService != null);
 
                 mGattCharacteristicsAdapter.clear();
+                mGattCharacteristicsAdapter.clearAdapter();
+                mGattCharacteristicsAdapter.notifyDataSetChanged();
+                //gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
                 for(BluetoothGattCharacteristic charac:gattService.getCharacteristics()){
                     GattCharacteristicsItem btchar = new GattCharacteristicsItem(
-                            charac.getUuid().toString(),
+                            serviceItem.getItemName(),
                             charac.getUuid().toString(),
                             charac);
-                    mGattCharacteristicsAdapter.addItem(btchar);
                     mGattCharacteristicsAdapter.add(btchar);
-
+                    mGattCharacteristicsAdapter.addItem(btchar);
                 }
                 mGattCharacteristicsAdapter.notifyDataSetChanged();
-
-
-
             }
         });
 

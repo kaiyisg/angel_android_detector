@@ -29,6 +29,10 @@ public class GattCharacteristicsAdapter extends ArrayAdapter<GattCharacteristics
         mGattCharacteristicsItems.add(item);
     }
 
+    public void clearAdapter(){
+        mGattCharacteristicsItems.clear();
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (view == null) {
@@ -55,7 +59,6 @@ public class GattCharacteristicsAdapter extends ArrayAdapter<GattCharacteristics
                 itemKeyView.setText(item.getItemKey());
             }
         }
-
         return view;
     }
 
