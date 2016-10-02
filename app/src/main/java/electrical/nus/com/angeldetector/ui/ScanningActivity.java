@@ -193,10 +193,6 @@ public class ScanningActivity extends AppCompatActivity {
                             }else{
                                 setViewState(NOTFOUND);
                             }
-                            /*BluetoothDeviceItem newDevice = new BluetoothDeviceItem(device.getName(), device.getAddress(), device);
-                            mLeDeviceListAdapter.add(newDevice);
-                            mLeDeviceListAdapter.addItem(newDevice);
-                            mLeDeviceListAdapter.notifyDataSetChanged();*/
                         }
                     });
                 }

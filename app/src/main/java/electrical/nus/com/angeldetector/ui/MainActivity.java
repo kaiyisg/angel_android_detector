@@ -19,6 +19,7 @@ import electrical.nus.com.angeldetector.R;
 import electrical.nus.com.angeldetector.adapter.BluetoothDeviceItem;
 import electrical.nus.com.angeldetector.adapter.GattServiceAdapter;
 import electrical.nus.com.angeldetector.adapter.GattServiceItem;
+import electrical.nus.com.angeldetector.services.SrvDictionary;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothDevice bluetoothDevice;
     ListView gattServicesListView;
     GattServiceAdapter mGattServiceAdapter;
+    SrvDictionary srvDictionary;
 
     private static final int GATT_STATE_DISCONNECTED = 0;
     private static final int GATT_STATE_CONNECTED = 1;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         gattServicesListView = (ListView)findViewById(R.id.gattServicesListView);
         mGattServiceAdapter = new GattServiceAdapter(this,R.layout.list_item);
         gattServicesListView.setAdapter(mGattServiceAdapter);
+        srvDictionary = new SrvDictionary();
 
     }
 
@@ -127,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         for(BluetoothGattService service:services){
                             GattServiceItem newService = new GattServiceItem(
-                                    service.getClass().toString(),
+                                    srvDictionary.map.get(service.getUuid()),
                                     service.getUuid().toString(),
                                     service);
                             mGattServiceAdapter.add(newService);

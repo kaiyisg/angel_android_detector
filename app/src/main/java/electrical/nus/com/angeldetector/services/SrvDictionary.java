@@ -14,6 +14,8 @@ public class SrvDictionary {
     public static final UUID HEART_RATE_SERVICE_UUID = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
     public static final UUID HEALTH_THERMOMETER_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
     public static final UUID BATTERY_LEVEL_SERVICE_UUID = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
+    public static final UUID GENERIC_ACCESS_SERVICE_UUID = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
+    public static final UUID DEVICE_INFORMATION_SERVICE_UUID = UUID.fromString("0000180A-0000-1000-8000-00805f9b34fb");
     //include device information service in the future
 
     //defined in angelsensor
@@ -26,7 +28,7 @@ public class SrvDictionary {
 
 
 
-    SrvDictionary(){
+    public SrvDictionary(){
         map = new HashMap<UUID , String>();
         map.put(HEART_RATE_SERVICE_UUID, "Bluetooth Standard: Heartrate Service");
         map.put(HEALTH_THERMOMETER_SERVICE_UUID, "Bluetooth Standard: Health thermometer Service");
@@ -37,5 +39,7 @@ public class SrvDictionary {
         map.put(WAVEFORM_SIGNAL_SERVICE_UUID, "Angel Standard: Waveform signal Service");
         map.put(HEALTH_JOURNAL_SERVICE_UUID,"Angel Standard: Health Journal Service");
         map.put(BLOOD_OXYGEN_SERVICE_UUID,"Angel Standard: Blood Oxygen Service");
+        map.put(GENERIC_ACCESS_SERVICE_UUID,"Bluetooth Standard: Generic Access");
+        map.put(DEVICE_INFORMATION_SERVICE_UUID,"Bluetooth Standard: Device Information");
     }
 }
