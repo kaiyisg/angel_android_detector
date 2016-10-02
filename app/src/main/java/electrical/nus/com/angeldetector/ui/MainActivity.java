@@ -19,11 +19,13 @@ import electrical.nus.com.angeldetector.R;
 public class MainActivity extends AppCompatActivity {
 
     TextView bleaddressTextView;
+    TextView gattStatusTextview;
     BluetoothDevice bluetoothDevice;
 
     private static final int GATT_STATE_DISCONNECTED = 0;
-    private static final int GATT_STATE_CONNECTING = 1;
-    private static final int GATT_STATE_CONNECTED = 2;
+    private static final int GATT_STATE_CONNECTED = 1;
+    private static final int GATT_STATE_DISCOVERED_SERVICES = 2;
+    private static final int GATT_STATE_NO_DISCOVERED_SERVICES = 3;
     private int gattState = GATT_STATE_DISCONNECTED;
 
     private final static String TAG = MainActivity.class.getSimpleName();
@@ -32,8 +34,44 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         bleaddressTextView = (TextView)findViewById(R.id.bleaddressTextView);
+        gattStatusTextview = (TextView)findViewById(R.id.gattStatusTextview);
+    }
+
+    private void setViewState(int state){
+        if(state==GATT_STATE_DISCONNECTED){
+            gattState=GATT_STATE_DISCONNECTED;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    gattStatusTextview.setText(R.string.status_connection_not_connected);
+                }
+            });
+        }else if(state==GATT_STATE_CONNECTED){
+            gattState=GATT_STATE_CONNECTED;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    gattStatusTextview.setText(R.string.status_connection_connected);
+                }
+            });
+        }else if(state==GATT_STATE_DISCOVERED_SERVICES){
+            gattState=GATT_STATE_DISCOVERED_SERVICES;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    gattStatusTextview.setText(R.string.status_discovered_gatt_services);
+                }
+            });
+        }else if(state==GATT_STATE_NO_DISCOVERED_SERVICES){
+            gattState=GATT_STATE_NO_DISCOVERED_SERVICES;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    gattStatusTextview.setText(R.string.status_no_discovered_gatt_services);
+                }
+            });
+        }
     }
 
     protected void onStart() {
@@ -43,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         assert(extras != null);
         bluetoothDevice = (BluetoothDevice)extras.getParcelable("bluetooth_device");
         bleaddressTextView.setText(bluetoothDevice.getAddress());
+
+        setViewState(GATT_STATE_DISCONNECTED);
 
         connect(bluetoothDevice);
     }
@@ -62,15 +102,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                setViewState(GATT_STATE_DISCOVERED_SERVICES);
                 List<BluetoothGattService> services = gatt.getServices();
                 for (BluetoothGattService service : services) {
                     List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
                 }
             } else {
+                setViewState(GATT_STATE_NO_DISCOVERED_SERVICES);
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
         }
@@ -79,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
             if(newState== BluetoothProfile.STATE_CONNECTED){
-                gattState=GATT_STATE_CONNECTED;
+                setViewState(GATT_STATE_CONNECTED);
                 Log.i(TAG, "Connected to GATT server.");
                 Log.i(TAG, "Attempting to start service discovery:" +
                         gatt.discoverServices());
@@ -92,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-
         }
     };
 
