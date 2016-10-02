@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Angel Detector</string>
+
+    <!--ScanningActivity-->
+    <string name="button_turn_bluetooth_on_button">Turn Bluetooth On</string>
+    <string name="button_start_scanning">Start Scanning for Angel</string>
+    <string name="status_bluetooth_on">Your Bluetooth is on!</string>
+    <string name="status_bluetooth_off">Your Bluetooth is off...</string>
+    <string name="status_bluetooth_scanning">Scanning for bluetooth Devices</string>
+    <string name="status_bluetooth_not_scanning">Not scanning for bluetooth Devices</string>
+    <string name="status_bluetooth_devices_found">Found bluetooth devices!</string>
 </resources>
