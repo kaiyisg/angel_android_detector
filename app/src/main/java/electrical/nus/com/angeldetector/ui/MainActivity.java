@@ -12,6 +12,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -159,7 +160,38 @@ public class MainActivity extends AppCompatActivity {
                 //clearUI();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 setViewState(GATT_STATE_DISCOVERED_SERVICES);
-                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                for(BluetoothGattService service:mBluetoothLeService.getSupportedGattServices()){
+                    GattServiceItem newService = new GattServiceItem(
+                            srvDictionary.map.get(service.getUuid()),
+                            service.getUuid().toString(),
+                            service);
+                    mGattServiceAdapter.add(newService);
+                    mGattServiceAdapter.addItem(newService);
+                    mGattServiceAdapter.notifyDataSetChanged();
+                }
+                gattServicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View item, int position, long id) {
+                        GattServiceItem serviceItem = mGattServiceAdapter.getItem(position);
+                        BluetoothGattService gattService= serviceItem.getmBluetoothGattService();
+                        gattCharacteristicsView.setVisibility(View.VISIBLE);
+                        Assert.assertTrue(gattService != null);
+
+                        mGattCharacteristicsAdapter.clear();
+                        mGattCharacteristicsAdapter.clearAdapter();
+                        mGattCharacteristicsAdapter.notifyDataSetChanged();
+                        //gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
+                        for(BluetoothGattCharacteristic charac:gattService.getCharacteristics()){
+                            GattCharacteristicsItem btchar = new GattCharacteristicsItem(
+                                    serviceItem.getItemName(),
+                                    charac.getUuid().toString(),
+                                    charac);
+                            mGattCharacteristicsAdapter.add(btchar);
+                            mGattCharacteristicsAdapter.addItem(btchar);
+                        }
+                        mGattCharacteristicsAdapter.notifyDataSetChanged();
+                    }
+                });
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 setViewState(GATT_STATE_DATA_AVAILABLE);
                 UserInteraction.showAlert("new data available", "data avail",context);
@@ -183,6 +215,10 @@ public class MainActivity extends AppCompatActivity {
         mGattServiceAdapter = new GattServiceAdapter(this,R.layout.list_item);
         gattServicesListView.setAdapter(mGattServiceAdapter);
         srvDictionary = new SrvDictionary();
+
+        mGattCharacteristicsAdapter = new GattCharacteristicsAdapter(this, R.layout.list_item);
+        gattCharacteristicsListView.setAdapter(mGattCharacteristicsAdapter);
+        gattCharacteristicsView.setVisibility(View.GONE);
         /*gattServicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View item, int position, long id) {
@@ -252,8 +288,24 @@ public class MainActivity extends AppCompatActivity {
         bleaddressTextView.setText(bluetoothDevice.getAddress());
 
         setViewState(GATT_STATE_DISCONNECTED);
+    }
 
-        connect(bluetoothDevice);
+    @Override
+    protected void onResume(){
+        super.onResume();
+        registerReceiver(mGattUpdateReceiver,makeGattUpdateIntentFilter());
+        if(mBluetoothLeService!=null){
+            final boolean result = mBluetoothLeService.connect(bluetoothDevice.getAddress());
+            Log.d(TAG, "Connect request result=" + result);
+        }
+    }
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
     }
 
     @Override
@@ -266,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void connect(BluetoothDevice bluetoothDevice){
+    /*private void connect(BluetoothDevice bluetoothDevice){
         bluetoothDevice.connectGatt(this,false,mGattCallback);
     }
 
@@ -279,9 +331,9 @@ public class MainActivity extends AppCompatActivity {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 setViewState(GATT_STATE_DISCOVERED_SERVICES);
                 final List<BluetoothGattService> services = bluetoothGatt.getServices();
-                /*for (BluetoothGattService service : services) {
+                *//*for (BluetoothGattService service : services) {
                     List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
-                }*/
+                }*//*
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -318,11 +370,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        /*public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+        *//*public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             //super.onCharacteristicChanged(gatt, characteristic);
             //broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             Log.i(TAG, characteristic.toString());
-        }*/
+        }*//*
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
@@ -360,6 +412,6 @@ public class MainActivity extends AppCompatActivity {
                 descriptor.getValue();
             }
         }
-    };
+    };*/
 
 }
