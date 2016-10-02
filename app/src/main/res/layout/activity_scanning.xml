@@ -17,17 +17,17 @@
         android:layout_margin="10dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:text="@string/status_bluetooth_off"
-            android:id="@+id/textView"
+            android:id="@+id/bluetoothStatusTextView"
             android:layout_gravity="center" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/button_turn_bluetooth_on_button"
-            android:id="@+id/button"
+            android:id="@+id/bluetoothButton"
             android:layout_gravity="center"
             android:layout_marginLeft="5dp" />
     </LinearLayout>
@@ -39,17 +39,17 @@
         android:layout_margin="10dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:text="@string/status_bluetooth_off"
-            android:id="@+id/textView2"
+            android:text="@string/status_bluetooth_not_scanning"
+            android:id="@+id/bluetoothScanningTextView"
             android:layout_gravity="center" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/button_turn_bluetooth_on_button"
-            android:id="@+id/button3"
+            android:text="@string/button_start_scanning"
+            android:id="@+id/bluetoothScanningButton"
             android:layout_gravity="center"
             android:layout_marginLeft="5dp" />
     </LinearLayout>
@@ -58,14 +58,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
+        android:text="@string/label_found_devices"
         android:id="@+id/textView3"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="40dp" />
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="177dp"
+        android:layout_height="match_parent"
         android:id="@+id/listView"
         android:layout_centerHorizontal="true" />
 

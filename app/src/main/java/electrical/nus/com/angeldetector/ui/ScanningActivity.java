@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import junit.framework.Assert;
 
@@ -21,13 +23,71 @@ import electrical.nus.com.angeldetector.adapter.BluetoothDeviceItem;
 
 public class ScanningActivity extends AppCompatActivity {
 
+    private static final int IDLE = 0;  //on but not scanning
+    private static final int SCANNING = 1;
+    private static final int FOUND = 2;
+    private static final int OFF = 3;
+    private int viewState = OFF;
+    private static final String bluetoothTag = "bluetooth device";
+
     private final static int REQUEST_ENABLE_BT = 1;
     private ListView bluetoothDeviceListView;
     BluetoothAdapter mBluetoothAdapter;
     private BluetoothDeviceAdapter mLeDeviceListAdapter;
     private boolean mScanning;
     private Handler mHandler;
-    private static final String bluetoothTag = "bluetooth device";
+
+    Button bluetoothScanningButton;
+    Button bluetoothButton;
+    TextView bluetoothStatusTextView;
+    TextView bluetoothScanningTextView;
+
+    private void setViewState(int viewState){
+        if(viewState==OFF){
+            bluetoothButton.setEnabled(true);
+            bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_off));
+            bluetoothScanningButton.setVisibility(View.GONE);
+            bluetoothScanningTextView.setVisibility(View.GONE);
+            bluetoothButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }
+            });
+        }
+        else if(viewState==IDLE){
+            bluetoothButton.setEnabled(false);
+            bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
+            bluetoothScanningButton.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setText(getResources().getString(R.string.status_bluetooth_not_scanning));
+            bluetoothScanningButton.setEnabled(true);
+            bluetoothScanningTextView.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    scanLeDevice(true);
+                }
+            });
+        }
+        else if(viewState==SCANNING){
+            bluetoothButton.setEnabled(false);
+            bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
+            bluetoothScanningButton.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setText(getResources().getString(R.string.button_start_scanning));
+            bluetoothScanningTextView.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setEnabled(false);
+        }
+        else if(viewState==FOUND){
+            bluetoothButton.setEnabled(false);
+            bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
+            bluetoothScanningButton.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setText(getResources().getString(R.string.status_bluetooth_devices_found));
+            bluetoothScanningTextView.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setEnabled(false);
+        }
+    }
+
 
 
     @Override
@@ -35,8 +95,13 @@ public class ScanningActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanning);
 
-
+        bluetoothScanningButton = (Button)findViewById(R.id.bluetoothScanningButton);
+        bluetoothButton = (Button)findViewById(R.id.bluetoothButton);
+        bluetoothStatusTextView = (TextView)findViewById(R.id.bluetoothStatusTextView);
+        bluetoothScanningTextView = (TextView)findViewById(R.id.bluetoothScanningTextView);
         bluetoothDeviceListView = (ListView)findViewById(R.id.listView);
+
+        mHandler=new Handler();
         if(this.mLeDeviceListAdapter==null){
             mLeDeviceListAdapter = new BluetoothDeviceAdapter(this,R.layout.list_item);
         }
@@ -56,20 +121,27 @@ public class ScanningActivity extends AppCompatActivity {
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        mHandler=new Handler();
-
     }
 
     @Override
     protected void onResume(){
         super.onResume();
+
         //checking if bluetooth is on or not
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            setViewState(OFF);
         }else{
-            scanLeDevice(true);
+            setViewState(IDLE);
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) {
+                setViewState(IDLE);
+            }
         }
     }
 
@@ -101,16 +173,16 @@ public class ScanningActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            /*if (device.getName() != null && device.getName().startsWith("Angel")) {
+                            if (device.getName() != null && device.getName().startsWith("Angel")) {
                                 BluetoothDeviceItem newDevice = new BluetoothDeviceItem(device.getName(), device.getAddress(), device);
                                 mLeDeviceListAdapter.add(newDevice);
                                 mLeDeviceListAdapter.addItem(newDevice);
                                 mLeDeviceListAdapter.notifyDataSetChanged();
-                            }*/
-                            BluetoothDeviceItem newDevice = new BluetoothDeviceItem(device.getName(), device.getAddress(), device);
+                            }
+                            /*BluetoothDeviceItem newDevice = new BluetoothDeviceItem(device.getName(), device.getAddress(), device);
                             mLeDeviceListAdapter.add(newDevice);
                             mLeDeviceListAdapter.addItem(newDevice);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
+                            mLeDeviceListAdapter.notifyDataSetChanged();*/
                         }
                     });
                 }

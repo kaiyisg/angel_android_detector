@@ -9,4 +9,5 @@
     <string name="status_bluetooth_scanning">Scanning for bluetooth Devices</string>
     <string name="status_bluetooth_not_scanning">Not scanning for bluetooth Devices</string>
     <string name="status_bluetooth_devices_found">Found bluetooth devices!</string>
+    <string name="label_found_devices">Found devices: </string>
 </resources>
