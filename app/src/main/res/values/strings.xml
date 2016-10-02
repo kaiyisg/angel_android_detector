@@ -11,4 +11,7 @@
     <string name="status_bluetooth_devices_found">Found bluetooth devices!</string>
     <string name="status_bluetooth_devices_not_found">Did not find angel devices!</string>
     <string name="label_found_devices">Found devices: </string>
+
+    <!--HomeActivity-->
+    <string name="angel_sensor">AngelSensor: </string>
 </resources>
