@@ -27,6 +27,7 @@ public class ScanningActivity extends AppCompatActivity {
     private static final int SCANNING = 1;
     private static final int FOUND = 2;
     private static final int OFF = 3;
+    private static final int NOTFOUND = 4;
     private int viewState = OFF;
     private static final String bluetoothTag = "bluetooth device";
 
@@ -41,6 +42,9 @@ public class ScanningActivity extends AppCompatActivity {
     Button bluetoothButton;
     TextView bluetoothStatusTextView;
     TextView bluetoothScanningTextView;
+
+    // Stops scanning after 10 seconds.
+    private static final long SCAN_PERIOD = 10000;
 
     private void setViewState(int viewState){
         if(viewState==OFF){
@@ -60,13 +64,14 @@ public class ScanningActivity extends AppCompatActivity {
             bluetoothButton.setEnabled(false);
             bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
             bluetoothScanningButton.setVisibility(View.VISIBLE);
-            bluetoothScanningButton.setText(getResources().getString(R.string.status_bluetooth_not_scanning));
+            bluetoothScanningButton.setText(getResources().getString(R.string.button_start_scanning));
             bluetoothScanningButton.setEnabled(true);
             bluetoothScanningTextView.setVisibility(View.VISIBLE);
             bluetoothScanningButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     scanLeDevice(true);
+                    setViewState(SCANNING);
                 }
             });
         }
@@ -74,7 +79,7 @@ public class ScanningActivity extends AppCompatActivity {
             bluetoothButton.setEnabled(false);
             bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
             bluetoothScanningButton.setVisibility(View.VISIBLE);
-            bluetoothScanningButton.setText(getResources().getString(R.string.button_start_scanning));
+            bluetoothScanningTextView.setText(getResources().getString(R.string.status_bluetooth_not_scanning));
             bluetoothScanningTextView.setVisibility(View.VISIBLE);
             bluetoothScanningButton.setEnabled(false);
         }
@@ -82,7 +87,15 @@ public class ScanningActivity extends AppCompatActivity {
             bluetoothButton.setEnabled(false);
             bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
             bluetoothScanningButton.setVisibility(View.VISIBLE);
-            bluetoothScanningButton.setText(getResources().getString(R.string.status_bluetooth_devices_found));
+            bluetoothScanningTextView.setText(getResources().getString(R.string.status_bluetooth_devices_found));
+            bluetoothScanningTextView.setVisibility(View.VISIBLE);
+            bluetoothScanningButton.setEnabled(false);
+        }
+        else if(viewState==NOTFOUND){
+            bluetoothButton.setEnabled(false);
+            bluetoothStatusTextView.setText(getResources().getString(R.string.status_bluetooth_on));
+            bluetoothScanningButton.setVisibility(View.VISIBLE);
+            bluetoothScanningTextView.setText(getResources().getString(R.string.status_bluetooth_devices_not_found));
             bluetoothScanningTextView.setVisibility(View.VISIBLE);
             bluetoothScanningButton.setEnabled(false);
         }
@@ -132,7 +145,6 @@ public class ScanningActivity extends AppCompatActivity {
             setViewState(OFF);
         }else{
             setViewState(IDLE);
-
         }
     }
 
@@ -145,8 +157,6 @@ public class ScanningActivity extends AppCompatActivity {
         }
     }
 
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -174,10 +184,13 @@ public class ScanningActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if (device.getName() != null && device.getName().startsWith("Angel")) {
+                                setViewState(FOUND);
                                 BluetoothDeviceItem newDevice = new BluetoothDeviceItem(device.getName(), device.getAddress(), device);
                                 mLeDeviceListAdapter.add(newDevice);
                                 mLeDeviceListAdapter.addItem(newDevice);
                                 mLeDeviceListAdapter.notifyDataSetChanged();
+                            }else{
+                                setViewState(NOTFOUND);
                             }
                             /*BluetoothDeviceItem newDevice = new BluetoothDeviceItem(device.getName(), device.getAddress(), device);
                             mLeDeviceListAdapter.add(newDevice);
