@@ -101,4 +101,18 @@
         </LinearLayout>
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/display_data"
+        android:id="@+id/displayDataSource" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Empty"
+        android:id="@+id/dataTextView" />
+
 </LinearLayout>
