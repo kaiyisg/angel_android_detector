@@ -27,7 +27,7 @@ public class GattServiceItem implements Comparable<GattServiceItem> {
     }
 
 
-    public BluetoothGattService getBluetoothDevice() {
+    public BluetoothGattService getmBluetoothGattService() {
         return mBluetoothGattService;
     }
 

@@ -32,25 +32,73 @@
             android:layout_marginLeft="10dp" />
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/angel_status"
-        android:id="@+id/textView2"
-        android:layout_marginTop="20dp" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/status_connection_not_connected"
-        android:id="@+id/gattStatusTextview" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/angel_status"
+            android:id="@+id/textView2"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_gravity="center" />
 
-    <ListView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/status_connection_not_connected"
+            android:id="@+id/gattStatusTextview"
+            android:layout_gravity="center"
+            android:layout_marginLeft="5dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@android:color/black"
+        android:id="@+id/gattServicesView">
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/gattServicesListView"
+            android:layout_gravity="center"
+            android:layout_margin="2dp"
+            android:background="@android:color/white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/gattServicesListView"
-        android:layout_gravity="center_horizontal" />
+        android:id="@+id/gattCharacteristicsView">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/gatt_characteristics"
+            android:id="@+id/gattCharacterisitcs" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@android:color/black"
+            android:id="@+id/linearLayout" >
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/gattCharacteristicsListView"
+                android:layout_gravity="center"
+                android:layout_margin="2dp"
+                android:background="@android:color/white" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>
