@@ -114,25 +114,25 @@ public class MainActivity extends AppCompatActivity {
                         if(!bluetoothGatt.setCharacteristicNotification(characteristic, true)) {
                             throw new AssertionError("Failed setCharacteristicNotification for UUID " + characteristic.getUuid());
                         } else {
-                            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
-                            byte[] NOTIFY_AND_INDICATE = new byte[]{(byte)3, (byte)0};
+                            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
+                            //byte[] NOTIFY_AND_INDICATE = new byte[]{(byte)3, (byte)0};
                             //descriptor.setValue(enabled?NOTIFY_AND_INDICATE:BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-                            descriptor.setValue(NOTIFY_AND_INDICATE);
+                            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                             //this.mWaitingForConfirmation = true;
                             if(!bluetoothGatt.writeDescriptor(descriptor)) {
                                 throw new AssertionError("Failed to write BLE descriptor " + descriptor.getUuid() + " for UUID " + characteristic.getUuid());
-                            } else {
+                            } /*else {
                                 try {
                                     synchronized(this) {
                                         this.wait(5000L);
-                                        /*if(this.mWaitingForConfirmation) {
+                                        *//*if(this.mWaitingForConfirmation) {
                                             throw new AssertionError("Did not receive confirmation for mBluetoothGatt.writeDescriptor(" + characteristic.getUuid() + ")");
-                                        }*/
+                                        }*//*
                                     }
                                 } catch (InterruptedException var8) {
                                     throw new AssertionError("Interrupted while waiting for response to mBluetoothGatt.writeDescriptor");
                                 }
-                            }
+                            }*/
                         }
                     }else{
                         UserInteraction.showAlert("Non-readable Bluetooth Property", String.valueOf(properties),context);
