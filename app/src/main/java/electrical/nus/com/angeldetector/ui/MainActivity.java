@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
                                 BluetoothGattCharacteristic characteristic = gattCharacteristicsItem.getmBluetoothGattCharacteristic();
                                 int charaProp = characteristic.getProperties();
 
+                                //(charaProp)& 10000 or charaProp & 100000
                                 if(((charaProp & 16) > 0 || (charaProp & 32) > 0)) {
                                     mBluetoothLeService.setCharacteristicNotification(characteristic,true);
                                     source = characteristic.getUuid().toString();
